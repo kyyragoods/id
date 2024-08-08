@@ -3,69 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Products Store</title>
-    <style>
-        .category {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px;
-            cursor: pointer;
-        }
-    </style>
+    <title>Fetch JSON Data</title>
 </head>
 <body>
-    <h1>Produk:</h1>
-    <div id="brands"></div>
+    <h1>Price List</h1>
+    <div id="price-list-container">Loading...</div>
 
     <script>
-        async function fetchPriceList() {
-            try {
-                const response = await fetch('/api/price-list');
-                if (!response.ok) throw new Error('Failed to fetch price list');
-                const data = await response.json();
-                return data.data;
-            } catch (error) {
-                console.error(error);
-                alert('Error fetching price list. Please try again later.');
-                return [];
-            }
-        }
+        // URL endpoint untuk mengambil JSON
+        const url = 'https://e8f5-210-87-124-214.ngrok-free.app/api/price-list';
 
-        function groupByBrand(products) {
-            const brands = {};
-            products.forEach(product => {
-                if (!brands[product.brand]) {
-                    brands[product.brand] = [];
+        // Mengambil JSON dari endpoint
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-                brands[product.brand].push(product);
+                return response.json();
+            })
+            .then(data => {
+                // Memproses dan menampilkan data
+                const container = document.getElementById('price-list-container');
+                container.innerHTML = ''; // Kosongkan kontainer
+
+                // Jika data berbentuk array, Anda bisa memetakannya
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.textContent = `Name: ${item.name}, Price: ${item.price}`;
+                    container.appendChild(div);
+                });
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                document.getElementById('price-list-container').textContent = 'Failed to load data.';
             });
-            return brands;
-        }
-
-        function slugify(str) {
-            return str.toLowerCase().replace(/\s+/g, '-');
-        }
-
-        function displayBrands(brands) {
-            const brandContainer = document.getElementById('brands');
-            brandContainer.innerHTML = '';
-            for (const brand in brands) {
-                const div = document.createElement('div');
-                div.className = 'category';
-                div.innerText = brand;
-                div.onclick = () => window.location.href = `/${slugify(brand)}`;
-                brandContainer.appendChild(div);
-            }
-        }
-
-        async function init() {
-            const products = await fetchPriceList();
-            const brands = groupByBrand(products);
-            displayBrands(brands);
-        }
-
-        window.onload = init;
     </script>
 </body>
 </html>
-￼Enter
